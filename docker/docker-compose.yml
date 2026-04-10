@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17.2-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: benchlab
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  grpc-service:
+    build:
+      context: ../grpc-service
+      dockerfile: Dockerfile
+    ports:
+      - "${GRPC_PORT:-50051}:50051"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT:-5433}
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=benchlab
+    depends_on:
+      - db
+volumes:
+  db_data:

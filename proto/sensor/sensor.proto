@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package sensor;
+
+option go_package = "benchlab/grpc-service/pb";
+
+import "google/protobuf/timestamp.proto";
+
+enum SensorType {
+    TEMPERATURE = 0;
+    PRESSURE = 1;
+    VIBRATION = 2;
+}
+
+enum SensorStatus {
+    ACTIVE = 0;
+    INACTIVE = 1;
+    MAINTENANCE = 2;
+}
+
+message Sensor {
+    int32 id = 1;
+    string name = 2;
+    SensorType type = 3;
+    string location = 4;
+    string unit = 5;
+    SensorStatus status = 6;
+    float last_value = 7;
+    google.protobuf.Timestamp last_reading_at = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message CreateSensorRequest {
+    Sensor sensor = 1;
+}
+
+message CreateSensorResponse {
+    Sensor sensor = 1;
+}
+
+message GetSensorRequest {
+    int32 id = 1;
+}
+
+message GetSensorResponse {
+    Sensor sensor = 1;
+}
+
+message ListSensorsRequest {
+}
+
+message ListSensorsResponse {
+    repeated Sensor sensors = 1;
+}
+
+message UpdateSensorRequest {
+    Sensor sensor = 1;
+}
+
+message UpdateSensorResponse {
+    Sensor sensor = 1;
+}
+
+message DeleteSensorRequest {
+    int32 id = 1;
+}
+
+message DeleteSensorResponse {
+    bool success = 1;
+}
+
+service SensorService {
+    rpc CreateSensor(CreateSensorRequest) returns (CreateSensorResponse);
+    rpc GetSensor(GetSensorRequest) returns (GetSensorResponse);
+    rpc ListSensors(ListSensorsRequest) returns (ListSensorsResponse);
+    rpc UpdateSensor(UpdateSensorRequest) returns (UpdateSensorResponse);
+    rpc DeleteSensor(DeleteSensorRequest) returns (DeleteSensorResponse);
+}
