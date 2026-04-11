@@ -19,3 +19,11 @@ docker-start:
 
 docker-stop:
 	./docker/docker.sh stop
+
+docker-rebuild:
+	./docker/docker.sh stop $(s) || true
+	./docker/docker.sh rm -f $(s) || true
+	./docker/docker.sh up -d --build $(s)
+
+k6-test:
+	k6 run benchmarks/scripts/$(s)

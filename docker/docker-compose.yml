@@ -33,6 +33,14 @@ services:
       - DB_NAME=benchlab
     depends_on:
       - db
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
     networks:
       - benchlab_network
     volumes:
@@ -52,6 +60,14 @@ services:
       - DB_NAME=benchlab
     depends_on:
       - db
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
     networks:
       - benchlab_network
     volumes:
