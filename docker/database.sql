@@ -15,7 +15,7 @@ CREATE TABLE sensor (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO sensor (name, type, location, unit, status) VALUES
-('Temperature Sensor 1', 'TEMPERATURE', 'Factory Floor', 'Celsius', 'ACTIVE'),
-('Pressure Sensor 1', 'PRESSURE', 'Pipeline', 'Bar', 'ACTIVE'),
-('Vibration Sensor 1', 'VIBRATION', 'Machine A', 'mm/s', 'MAINTENANCE');
+INSERT INTO sensor (name, type, location, unit, status, last_value, last_reading_at) VALUES
+('Temperature Sensor 1', 'TEMPERATURE', 'Factory Floor', 'Celsius', 'ACTIVE', 25.0, NOW()),
+('Pressure Sensor 1', 'PRESSURE', 'Pipeline', 'Bar', 'ACTIVE', 10.0, NOW()),
+('Vibration Sensor 1', 'VIBRATION', 'Machine A', 'mm/s', 'MAINTENANCE', 0.5, NOW());

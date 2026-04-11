@@ -15,6 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - benchlab_network
 
 
   grpc-service:
@@ -31,5 +33,33 @@ services:
       - DB_NAME=benchlab
     depends_on:
       - db
+    networks:
+      - benchlab_network
+    volumes:
+      - ../grpc-service:/app
+
+  rest-service:
+    build:
+      context: ../rest-service
+      dockerfile: Dockerfile
+    ports:
+      - "${REST_PORT:-8080}:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT:-5433}
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=benchlab
+    depends_on:
+      - db
+    networks:
+      - benchlab_network
+    volumes:
+      - ../rest-service:/app
+
 volumes:
   db_data:
+
+networks:
+  benchlab_network:
+    driver: bridge
