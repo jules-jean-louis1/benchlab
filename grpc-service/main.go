@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"grpc-sensor-service/db"
 	pb "grpc-sensor-service/pb/sensor"
@@ -189,8 +190,42 @@ func (s *sensorServer) DeleteSensor(ctx context.Context, req *pb.DeleteSensorReq
 	return &pb.DeleteSensorResponse{Success: true}, nil
 }
 
-func (s *sensorServer) StreamSensorReadings(ctx context.Context, req *pb.StreamSensorReadingsRequest, stream pb.SensorService_StreamSensorReadingsServer) error {
-	// Implementation for streaming sensor readings
+func (s *sensorServer) StreamSensorReadings(req *pb.StreamSensorReadingsRequest, stream grpc.ServerStreamingServer[pb.StreamSensorReadingsResponse]) error {
+	id := req.GetId()
+	sensor := &pb.Sensor{}
+
+	var tempType sql.NullString
+	var tempStatus sql.NullString
+	var tempLastR sql.NullTime
+	var tempCr sql.NullTime
+	sqlStatment := `SELECT id,name,type,location,unit,status,last_value,last_reading_at,created_at FROM sensor WHERE id=$1`
+	err := s.database.QueryRowContext(stream.Context(), sqlStatment, id).Scan(&sensor.Id, &sensor.Name, &tempType, &sensor.Location, &sensor.Unit, &tempStatus, &sensor.LastValue, &tempLastR, &tempCr)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("Capteur introuvable")
+	} else if err != nil {
+		return fmt.Errorf("Erreur interne: %v", err)
+	}
+	if tempType.Valid {
+		value := pb.SensorType_value[tempType.String]
+		sensor.Type = pb.SensorType(value)
+	}
+	if tempStatus.Valid {
+		value := pb.SensorStatus_value[tempStatus.String]
+		sensor.Status = pb.SensorStatus(value)
+	}
+	if tempLastR.Valid {
+		sensor.LastReadingAt = timestamppb.New(tempLastR.Time)
+	}
+	if tempCr.Valid {
+		sensor.CreatedAt = timestamppb.New(tempCr.Time)
+	}
+	for i := 0; i < 1000; i++ {
+		sensor.LastReadingAt = timestamppb.New(time.Now())
+		sensor.LastValue = sensor.LastValue + float32(i)
+		if err := stream.Send(&pb.StreamSensorReadingsResponse{Sensor: sensor}); err != nil {
+			return fmt.Errorf("Erreur lors de l'envoi du capteur: %v", err)
+		}
+	}
 	return nil
 }
 

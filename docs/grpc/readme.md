@@ -85,3 +85,15 @@ grpcurl -plaintext \
   localhost:50051 sensor.SensorService/ListSensors
 ```
 
+6. Utiliser le stream pour simuler un flux de données (StreamSensorReadings)
+
+```bash
+grpcurl -plaintext \
+  -import-path ./proto \
+  -proto proto/sensor/sensor.proto \
+  -d '{
+    "id": "4"
+  }' \
+  localhost:50051 sensor.SensorService/StreamSensorReadings
+```
+
