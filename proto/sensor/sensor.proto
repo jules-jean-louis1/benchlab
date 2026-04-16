@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sensor;
 
-option go_package = "benchlab/grpc-service/pb";
+option go_package = "grpc-sensor-service/pb/sensor;pb";
 
 import "google/protobuf/timestamp.proto";
 
@@ -69,10 +69,19 @@ message DeleteSensorResponse {
     bool success = 1;
 }
 
+message StreamSensorReadingsRequest {
+    int32 id = 1;
+}
+
+message StreamSensorReadingsResponse {
+    Sensor sensor = 1;
+}
+
 service SensorService {
     rpc CreateSensor(CreateSensorRequest) returns (CreateSensorResponse);
     rpc GetSensor(GetSensorRequest) returns (GetSensorResponse);
     rpc ListSensors(ListSensorsRequest) returns (ListSensorsResponse);
     rpc UpdateSensor(UpdateSensorRequest) returns (UpdateSensorResponse);
     rpc DeleteSensor(DeleteSensorRequest) returns (DeleteSensorResponse);
+    rpc StreamSensorReadings(StreamSensorReadingsRequest) returns (stream StreamSensorReadingsResponse);
 }

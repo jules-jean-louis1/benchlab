@@ -189,6 +189,11 @@ func (s *sensorServer) DeleteSensor(ctx context.Context, req *pb.DeleteSensorReq
 	return &pb.DeleteSensorResponse{Success: true}, nil
 }
 
+func (s *sensorServer) StreamSensorReadings(ctx context.Context, req *pb.StreamSensorReadingsRequest, stream pb.SensorService_StreamSensorReadingsServer) error {
+	// Implementation for streaming sensor readings
+	return nil
+}
+
 func main() {
 	// 2. On récupère la connexion à la base de données
 	dbConn := db.Connect()
