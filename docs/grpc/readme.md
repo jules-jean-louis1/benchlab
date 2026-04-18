@@ -97,3 +97,13 @@ grpcurl -plaintext \
   localhost:50051 sensor.SensorService/StreamSensorReadings
 ```
 
+```bash
+grpcurl -plaintext \
+  -import-path ./proto \
+  -proto proto/sensor/sensor.proto \
+  -d '{
+    "limit": 100
+    "offset": 0
+  }' \
+  localhost:50051 sensor.SensorService/PageSensors
+```

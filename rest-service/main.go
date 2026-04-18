@@ -157,6 +157,36 @@ func main() {
 		}
 		ctx.JSON(http.StatusOK, gin.H{"message": "Sensor deleted successfully"})
 	})
+
+	r.GET("/page-sensors", func(ctx *gin.Context) {
+		limit := ctx.Query("limit")
+		offset := ctx.Query("offset")
+
+		if len(limit) == 0 || len(offset) == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Param not provided"})
+			return
+		}
+		sqlStatment := `SELECT id, name, type, location, unit, status, last_value, last_reading_at, created_at from sensor s order by id limit $1 offset $2;`
+		rows, err := DB.QueryContext(ctx, sqlStatment, limit, offset)
+		if err != nil {
+			log.Printf("erreur")
+		}
+		defer rows.Close()
+
+		var sensors []Sensor
+		for rows.Next() {
+			var sensor Sensor
+			err := rows.Scan(&sensor.ID, &sensor.Name, &sensor.Type, &sensor.Location, &sensor.Unit, &sensor.Status, &sensor.LastValue, &sensor.LastReadingAt, &sensor.CreatedAt)
+			if err != nil {
+				log.Printf("erreur lors du scan des capteurs: %v", err)
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du scan des capteurs"})
+				return
+			}
+			sensors = append(sensors, sensor)
+		}
+		ctx.JSON(http.StatusOK, gin.H{"sensors": sensors})
+
+	})
 	// Start server on port 8080 (default)
 	// Server will listen on 0.0.0.0:8080 (localhost:8080 on Windows)
 	r.Run()

@@ -229,6 +229,49 @@ func (s *sensorServer) StreamSensorReadings(req *pb.StreamSensorReadingsRequest,
 	return nil
 }
 
+func (s *sensorServer) PageSensors(ctx context.Context, req *pb.PageSensorsRequest) (*pb.PageSensorsResponse, error) {
+	limit := req.GetLimit()
+	offset := req.GetOffset()
+	sqlStatment := `SELECT id, name, type, location, unit, status, last_value, last_reading_at, created_at from sensor s order by id limit $1 offset $2;`
+	rows, err := s.database.QueryContext(ctx, sqlStatment, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("Erreur lors de la récupération des capteurs: %v", err)
+	}
+	defer rows.Close()
+	var sensors []*pb.Sensor
+
+	for rows.Next() {
+		sensor := &pb.Sensor{}
+
+		var tempType, tempStatus sql.NullString
+		var tempLastR, tempCr sql.NullTime
+
+		err := rows.Scan(
+			&sensor.Id, &sensor.Name, &tempType, &sensor.Location, &sensor.Unit,
+			&tempStatus, &sensor.LastValue, &tempLastR, &tempCr,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Erreur de format de ligne: %v", err)
+		}
+
+		if tempType.Valid {
+			sensor.Type = pb.SensorType(pb.SensorType_value[tempType.String])
+		}
+		if tempStatus.Valid {
+			sensor.Status = pb.SensorStatus(pb.SensorStatus_value[tempStatus.String])
+		}
+		if tempLastR.Valid {
+			sensor.LastReadingAt = timestamppb.New(tempLastR.Time)
+		}
+		if tempCr.Valid {
+			sensor.CreatedAt = timestamppb.New(tempCr.Time)
+		}
+
+		sensors = append(sensors, sensor)
+	}
+	return &pb.PageSensorsResponse{Sensors: sensors}, nil
+}
+
 func main() {
 	// 2. On récupère la connexion à la base de données
 	dbConn := db.Connect()

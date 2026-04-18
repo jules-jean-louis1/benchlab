@@ -77,6 +77,15 @@ message StreamSensorReadingsResponse {
     Sensor sensor = 1;
 }
 
+message PageSensorsRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+}
+
+message PageSensorsResponse {
+    repeated Sensor sensors = 1;
+}
+
 service SensorService {
     rpc CreateSensor(CreateSensorRequest) returns (CreateSensorResponse);
     rpc GetSensor(GetSensorRequest) returns (GetSensorResponse);
@@ -84,4 +93,5 @@ service SensorService {
     rpc UpdateSensor(UpdateSensorRequest) returns (UpdateSensorResponse);
     rpc DeleteSensor(DeleteSensorRequest) returns (DeleteSensorResponse);
     rpc StreamSensorReadings(StreamSensorReadingsRequest) returns (stream StreamSensorReadingsResponse);
+    rpc PageSensors(PageSensorsRequest) returns (PageSensorsResponse);
 }
